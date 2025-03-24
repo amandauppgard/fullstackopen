@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 const Filter = ({value, onChange}) => {
   return(
@@ -36,13 +36,14 @@ const PersonForm = ({onSubmit, nameValue, onNameChange,  numberValue, onNumberCh
   )
 }
 
-const Persons = ({filteredPersons}) => {
+const Persons = ({filteredPersons, deletePerson}) => {
   return (
     <div>
       <ul>
         {filteredPersons().map(person => 
           <li key={person.name}>
             {person.name} {person.number}
+            <button onClick={deletePerson}>delete</button>
           </li>
         )}
       </ul>
@@ -58,14 +59,10 @@ const App = () => {
   const [filter, setFilter] = useState('')
 
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
-      })
-  })
+    personService.getAll().then((initialPersons) => {
+      setPersons(initialPersons)
+    })
+  }, [])
 
   const checkIfPersonExists = () => {
     if(persons.some(e => e.name === newName)){
@@ -89,12 +86,18 @@ const App = () => {
         id: String(persons.length + 1)
       }
   
-      setPersons(persons.concat(personObject))
-      setNewName('')
-      setNewNumber('')
+      personService
+        .create(personObject)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+          setNewName('')
+          setNewNumber('')
+        })
     }
-    
-    
+  }
+  
+  const deletePerson = () => {
+    console.log('Person deleted!')
   }
 
   const filteredPersons = () => {
@@ -124,7 +127,7 @@ const App = () => {
         numberValue={newNumber} onNumberChange = {handleNumberChange}  
         />
       <h2>Numbers</h2>
-      <Persons filteredPersons = {filteredPersons} />
+      <Persons filteredPersons = {filteredPersons} deletePerson={deletePerson}/>
     </div>
   )
 }
