@@ -41,16 +41,16 @@ const Persons = ({filteredPersons, deletePerson}) => {
     <div>
       <ul>
         {filteredPersons().map(person => 
-          <li key={person.name}>
+          <li key={person.id}>
             {person.name} {person.number}
-            <button onClick={deletePerson}>delete</button>
+            <button onClick={() => deletePerson(person.id)}>delete</button>
           </li>
         )}
       </ul>
     </div>
   )
-
 }
+
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -76,8 +76,19 @@ const App = () => {
     event.preventDefault()
     const personExists = checkIfPersonExists()
 
-    if(personExists == true) {
-      alert(`${newName} is already added to phonebook`)
+    if(personExists === true) {
+      if (window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)) {
+        let person = persons.find((p) => p.name === newName);
+        person.number = newNumber
+        personService
+        .updateNumber(person.id, person)
+        .then(returnedPerson => {
+          const updatedPersons = persons.filter((p) => p.id !== person.id)
+          setPersons(updatedPersons.concat(returnedPerson))
+          setNewName('')
+          setNewNumber('')
+        })
+      }
     }
     else {
       const personObject = {
@@ -96,8 +107,17 @@ const App = () => {
     }
   }
   
-  const deletePerson = () => {
-    console.log('Person deleted!')
+  const deletePerson = (id) => {
+    const person = persons.find((p) => p.id === id)
+    console.log(person)
+
+    if(window.confirm(`Delete ${person.name}?`)){
+      personService
+      .deleteObject(id)
+      .then(() => {
+        setPersons(persons.filter(n => n.id !== id))
+      })
+    }
   }
 
   const filteredPersons = () => {
