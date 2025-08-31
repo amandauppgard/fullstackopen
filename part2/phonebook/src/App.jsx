@@ -51,12 +51,39 @@ const Persons = ({filteredPersons, deletePerson}) => {
   )
 }
 
+const ErrorNotification = ({errMessage}) => {
+  if (errMessage == null) {
+    return null
+  }
+
+  return (
+    <div className='error'>
+      {errMessage}
+    </div>
+  )
+}
+
+const Notification = ({message}) => {
+  if (message === null){
+    return null
+  }
+
+  return (  
+    <div className='message'>
+      {message}
+    </div>
+  )
+  
+}
+
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
+  const [errMessage, setErrMessage] = useState(null);
 
   useEffect(() => {
     personService.getAll().then((initialPersons) => {
@@ -87,6 +114,17 @@ const App = () => {
           setPersons(updatedPersons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+
+          setMessage(`${newName}'s number was updated`)
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
+        })
+        .catch(() => {
+          setErrMessage(`Information of ${person.name} has already been removed from server`)
+          setTimeout(() => {
+            setErrMessage(null)
+          },5000)
         })
       }
     }
@@ -103,6 +141,11 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+
+          setMessage(`Added ${newName}`)
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
         })
     }
   }
@@ -140,6 +183,8 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <ErrorNotification errMessage={errMessage} />
+      <Notification message={message} errMessage={errMessage} />
       <Filter onChange={handleFilterChange} value = {filter} />
       <h2>Add new person</h2>
       <PersonForm 
