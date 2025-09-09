@@ -132,7 +132,6 @@ const App = () => {
       const personObject = {
         name: newName,
         number: newNumber,
-        id: String(persons.length + 1)
       }
   
       personService
@@ -146,6 +145,13 @@ const App = () => {
           setTimeout(() => {
             setMessage(null)
           }, 5000)
+        })
+        .catch((e) => {
+          console.log(e.response.data.error)
+          setErrMessage(e.response.data.error)
+          setTimeout(() => {
+            setErrMessage(null)
+          },5000)
         })
     }
   }
