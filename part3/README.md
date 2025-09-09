@@ -1,1 +1,1 @@
-Link to the online application for phonebook: https://phonebook-backend-vxk6.onrender.com
+The phonbook backend from exercise 3.9 and forward can be found at https://github.com/amandauppgard/phonebook-backend
