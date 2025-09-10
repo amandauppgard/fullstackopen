@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "author": "Amanda Uppgard",
   "license": "ISC",
@@ -13,6 +13,7 @@
   "dependencies": {
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "lodash": "^4.17.21",
     "mongoose": "^8.18.1",
     "morgan": "^1.10.1"
   }
