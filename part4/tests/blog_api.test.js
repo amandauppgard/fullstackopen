@@ -106,6 +106,45 @@ test('missing title or url returns code 400 bad request', async () => {
         .expect(400)
 })
 
+test('blog post can be deleted', async () => {
+    const response = await api.get('/api/blogs')
+    const postToDelete = response.body[0]
+
+    await api 
+        .delete(`/api/blogs/${postToDelete.id}`)
+        .expect(204)
+
+    const updatedResponse = await api.get('/api/blogs')
+    assert.strictEqual(updatedResponse.body[0] !== postToDelete, true)
+})
+
+test('blog post can be updated', async () => {
+    const response = await api.get('/api/blogs')
+    const postToUpdate = response.body[0]
+
+    const updatedPost = {
+        author: "new",
+        title: 'new title',
+        url: 'www.a.com',
+        likes: 3
+    }
+
+    await api
+        .put(`/api/blogs/${postToUpdate.id}`)
+        .send(updatedPost)
+        .expect(200)
+
+    const updatedPosts = await api.get('/api/blogs')
+    assert.deepStrictEqual({
+        author: updatedPosts.body[0].author,
+        title: updatedPosts.body[0].title,
+        url: updatedPosts.body[0].url,
+        likes: updatedPosts.body[0].likes
+    },
+    updatedPost
+    )
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
