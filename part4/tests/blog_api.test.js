@@ -1,33 +1,32 @@
 const { test, after, beforeEach } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const bcrypt = require('bcrypt')
 const app = require('../app')
+const api = supertest(app)
+const helper = require('./test_helper')
 const Blog = require('../models/blog')
 const assert = require('node:assert')
+const User = require('../models/user')
 
-const api = supertest(app)
 
-const initialBlogPosts = [
-    {
-        title: "blog post 2",
-        author: "mongo",
-        url: "http://mongodb.com",
-        likes: 50
-    }, 
-    {
-        title: "blog post",
-        author: "amanda",
-        url: "http://address.com",
-        likes: 3
-    }
-]
+let token = null
 
-beforeEach(async () => {  
-    await Blog.deleteMany({})  
-    let blogObject = new Blog(initialBlogPosts[0])  
-    await blogObject.save()  
-    blogObject = new Blog(initialBlogPosts[1])  
-    await blogObject.save()
+beforeEach(async () => {
+  await Blog.deleteMany({})
+  await Blog.insertMany(helper.initialBlogPosts)
+
+  await User.deleteMany({})
+
+  const passwordHash = await bcrypt.hash('password', 10)
+  const user = new User({ username: 'testUser', passwordHash })
+  await user.save()
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: 'testUser', password: 'password' })
+
+  token = loginResponse.body.token
 })
 
 test('correct amount of blog posts are returned as json', async () => {
@@ -49,7 +48,7 @@ test('unique identifier is named id', async () => {
     assert.ok(blog.id)
 })
 
-test('blog post can be added', async () => {
+test('blog post cannot be added without token', async () => {
     const newPost = {
         title: "new blog post",
         author: "author",
@@ -60,12 +59,28 @@ test('blog post can be added', async () => {
     await api
         .post('/api/blogs')
         .send(newPost)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+})
+
+test('blog post can be added', async () => {
+    const newPost = {
+        title: "new blog post",
+        author: "author",
+        url: "frogsarecool.com",
+        likes: 89
+    }
+
+    await api
+        .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
+        .send(newPost)
         .expect(201)
         .expect('Content-Type', /application\/json/)
     
     const response = await api.get('/api/blogs')
     const savedPost = response.body[response.body.length - 1]
-    assert.strictEqual(response.body.length > initialBlogPosts.length, true)
+    assert.strictEqual(response.body.length > helper.initialBlogPosts.length, true)
     assert.deepStrictEqual(
         {
             title: savedPost.title,
@@ -85,6 +100,7 @@ test('likes default to 0 if missing', async () => {
 
     await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(missingLikes)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -106,12 +122,27 @@ test('missing title or url returns code 400 bad request', async () => {
         .expect(400)
 })
 
-test('blog post can be deleted', async () => {
+test('blog post can be deleted by user who created it', async () => {
+    const newPost = {
+        title: "new blog post",
+        author: "author",
+        url: "frogsarecool.com",
+        likes: 89
+    }
+
+    await api
+        .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
+        .send(newPost)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
     const response = await api.get('/api/blogs')
-    const postToDelete = response.body[0]
+    const postToDelete = response.body[response.body.length - 1]
 
     await api 
         .delete(`/api/blogs/${postToDelete.id}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(204)
 
     const updatedResponse = await api.get('/api/blogs')
@@ -143,6 +174,73 @@ test('blog post can be updated', async () => {
     },
     updatedPost
     )
+})
+
+test('new user can be created', async () => {
+    const initialUsers = await api.get('/api/users')
+    const newUser = {
+        username: "username",
+        name: "name",
+        password: "password"
+    }
+
+    await api 
+        .post('/api/users')
+        .send(newUser)
+        .expect(201)
+
+    const updatedUsers = await api.get('/api/users')
+    assert.strictEqual(updatedUsers.body.length > initialUsers.body.length, true)
+})
+
+test('missing password returns code 400 bad request', async () => {
+    const noPassword = {
+        username: "username",
+        name: "name"
+    }
+
+    await api 
+        .post('/api/users')
+        .send(noPassword)
+        .expect(400)
+})
+
+test('too short password returns code 400 bad request', async () => {
+    const invalidPassword = {
+        username: "username",
+        name: "name",
+        password: "p"
+    }
+
+    await api 
+        .post('/api/users')
+        .send(invalidPassword)
+        .expect(400)
+})
+
+test('too short username returns code 400 bad request', async () => {
+    const invalidUsername = {
+        username: "u",
+        name: "name",
+        password: "password"
+    }
+
+    await api 
+        .post('/api/users')
+        .send(invalidUsername)
+        .expect(400)
+})
+
+test('missing username returns code 400 bad request', async () => {
+    const invalidPassword = {
+        name: "name",
+        password: "p"
+    }
+
+    await api 
+        .post('/api/users')
+        .send(invalidPassword)
+        .expect(400)
 })
 
 after(async () => {

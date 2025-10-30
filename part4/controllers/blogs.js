@@ -1,17 +1,22 @@
 const blogsRouter = require('express').Router()
-const { request } = require('http')
 const Blog = require('../models/blog')
-const { response } = require('../app')
+const { userExtractor } = require('../utils/middleware')
 
+blogsRouter.get('/', async (request, response) => {
+  const blogs = await Blog
+    .find({})
+    .populate('user', {username: 1, name: 1})
 
-blogsRouter.get('/', (request, response) => {
-  Blog.find({}).then((blogs) => {
-    response.json(blogs)
-  })
+  response.json(blogs)
 })
 
-blogsRouter.post('/', (request, response) => {
+blogsRouter.post('/', userExtractor, async (request, response) => {
   const blog = new Blog(request.body)
+  const user = request.user
+
+  if (!user) {
+    return response.status(400).json({ error: 'userId missing or not valid' })
+  }
 
   if (blog.title === undefined || blog.url == undefined) {
     return response.status(400).json({error: 'missing title or url'})
@@ -19,12 +24,23 @@ blogsRouter.post('/', (request, response) => {
 
   if (blog.likes === undefined) blog.likes = 0
 
-  blog.save().then((result) => {
-    response.status(201).json(result)
-  })
+  blog.user = user._id
+
+  const savedBlog = await blog.save()
+  user.blogs = user.blogs.concat(savedBlog._id)
+  await user.save()
+
+  response.status(201).json(savedBlog)
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
+blogsRouter.delete('/:id', userExtractor, async (request, response) => {
+  const user = request.user
+  const blog = await Blog.findById(request.params.id)
+  
+  if (user._id.toString() !== blog.user.toString()) {
+    return response.status(403).json({ error: 'permission denied' })
+  }
+
   await Blog.findByIdAndDelete(request.params.id)
   response.status(204).end()
 })
