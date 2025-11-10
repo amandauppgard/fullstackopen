@@ -9,7 +9,7 @@ const BlogInformation = ({ blog, isVisible, handleLike, user, handleDelete }) =>
           <p>likes {blog.likes} </p>
           <button onClick={() => handleLike(blog.id)}>like</button>
         </div>
-        <p>{blog.author}</p>
+        <p>{blog.user ? blog.user.username : "No user"}</p>
         {blog.user && (blog.user.username === user.username) ? (
           <button onClick={() => handleDelete(blog.id)}>delete</button>
         ) : (
@@ -33,7 +33,7 @@ const Blog = ({ blog, handleLike, user, handleDelete }) => {
 
   return (
     <div style={blogStyle} >
-      {blog.title}
+      {blog.title} {blog.author}
       <button onClick={() => setIsVisible(!isVisible)}>{!isVisible ? 'view' : 'hide' }</button>
       <BlogInformation blog={blog} isVisible={isVisible} handleLike={handleLike} user={user} handleDelete={handleDelete} />
     </div>
