@@ -30,13 +30,16 @@ blogsRouter.post('/', userExtractor, async (request, response) => {
   user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
 
-  response.status(201).json(savedBlog)
+  const populatedBlog = await Blog.findById(savedBlog._id)
+    .populate('user', { username: 1, name: 1 })
+
+  response.status(201).json(populatedBlog)
 })
 
 blogsRouter.delete('/:id', userExtractor, async (request, response) => {
   const user = request.user
   const blog = await Blog.findById(request.params.id)
-  
+
   if (user._id.toString() !== blog.user.toString()) {
     return response.status(403).json({ error: 'permission denied' })
   }
@@ -60,7 +63,10 @@ blogsRouter.put('/:id', async (request, response, next) => {
     post.likes = likes ?? post.likes
 
     const updatedPost = await post.save()
-    response.json(updatedPost)
+    const populatedPost = await Blog.findById(updatedPost._id)
+      .populate('user', { username: 1, name: 1 })
+
+    response.json(populatedPost)
   } catch (error) {
     next(error)
   }
