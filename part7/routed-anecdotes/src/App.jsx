@@ -7,6 +7,7 @@ import {
   useParams,
   useNavigate
 } from 'react-router-dom'
+import { useField } from './hooks'
 
 const Menu = () => {
   const padding = {
@@ -39,7 +40,7 @@ const Anecdote = ({ anecdotes }) => {
 
   return (
     <div>
-      <h2>{anecdote.content}</h2>
+      <h2>{anecdote.content} by {anecdote.author}</h2>
       <div>has {anecdote.votes} votes</div>
       <div>for more info see <a href={anecdote.info}>{anecdote.info}</a></div>
     </div>
@@ -69,20 +70,20 @@ const Footer = () => (
 )
 
 const CreateNew = (props) => {
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
+  const content = useField('text')
+  const author = useField('text')
+  const info = useField('text')
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
     props.addNew({
-      content,
-      author,
-      info,
+      content: content.value,
+      author: author.value,
+      info: info.value,
       votes: 0
     })
-    props.setNotification(`a new anecdote ${content} created!`)
+    props.setNotification(`a new anecdote ${content.value} created!`)
     navigate('/')
   }
 
@@ -92,16 +93,17 @@ const CreateNew = (props) => {
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
+          <input name='content' type={content.type} value={content.value} onChange={content.onChange} />
         </div>
         <div>
           author
-          <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <input name='author' type={author.type} value={author.value} onChange={author.onChange} />
         </div>
         <div>
           url for more info
-          <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
+          <input name='info' type={info.type} value={info.value} onChange={info.onChange} />
         </div>
+        <button type='button' onClick={() => {content.reset(), info.reset(), author.reset()}}>reset</button>
         <button>create</button>
       </form>
     </div>
@@ -149,6 +151,7 @@ const App = () => {
     setAnecdotes(anecdotes.concat(anecdote))
   }
 
+  /*
   const anecdoteById = (id) =>
     anecdotes.find(a => a.id === id)
 
@@ -162,6 +165,7 @@ const App = () => {
 
     setAnecdotes(anecdotes.map(a => a.id === id ? voted : a))
   }
+  */
 
   return (
     <Router>
