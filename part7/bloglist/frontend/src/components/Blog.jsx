@@ -1,41 +1,49 @@
-import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom'
+import { deleteBlog, likeBlog } from '../reducers/blogReducer'
+import { setNotification } from '../reducers/notificationReducer'
 
-const BlogInformation = ({ blog, isVisible, handleLike, user, handleDelete }) => {
-  if (isVisible) {
-    return(
-      <div>
-        <p>{blog.url}</p>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <p>likes {blog.likes} </p>
-          <button onClick={() => handleLike(blog)}>like</button>
-        </div>
-        <p>{blog.user ? blog.user.username : 'No user'}</p>
-        {blog.user && (blog.user.username === user.username) ? (
-          <button onClick={() => handleDelete(blog.id)}>delete</button>
-        ) : (
-          <></>
-        )}
-      </div>
-    )
-  }
-}
 
-const Blog = ({ blog, handleLike, user, handleDelete }) => {
-  const [isVisible, setIsVisible] = useState(false)
+const Blog = () => {
+  const blogs = useSelector(state => state.blogs)
+  const user = useSelector(state => state.user)
+  const { id } = useParams()
+  const blog = blogs.find(b => b.id === id)
+  const dispatch = useDispatch()
 
-  const blogStyle = {
-    paddingBlock: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5
-  }
+  const handleLike = (blog) => {
+    dispatch(likeBlog(blog))
+    dispatch(setNotification(`You liked ${blog.title}`, 5, 'success'))
+  };
+
+  const handleDelete = (id) => {
+    const blog = blogs.find((blog) => blog.id === id);
+    if (blog && window.confirm(`Delete blog ${blog.title} by ${blog.author}`)) {
+      dispatch(deleteBlog(blog.id))
+      dispatch(setNotification(`Successfully deleted ${blog.title} by ${blog.author}`, 5, 'success'))
+
+    }
+  };
+
+  if (!blog) return null
+
 
   return (
-    <div style={blogStyle} className='blog' >
-      <span>{blog.title}</span> <span>{blog.author}</span>
-      <button onClick={() => setIsVisible(!isVisible)}>{!isVisible ? 'view' : 'hide' }</button>
-      <BlogInformation blog={blog} isVisible={isVisible} handleLike={handleLike} user={user} handleDelete={handleDelete} />
+    <div >
+      <h2>{blog.title}</h2>
+      <a href={blog.url} >{blog.url}</a>
+      <div>
+        {blog.likes} likes
+        <button onClick={() => handleLike(blog)}>like</button>
+      </div>
+      added by {blog.author}
+      <div>
+      {blog.user && (blog.user.username === user.username) ? (
+        <button onClick={() => handleDelete(blog.id)}>delete</button>
+      ) : (
+        <></>
+      )}
+      </div>
     </div>
   )
 }
