@@ -1,4 +1,5 @@
 const blogsRouter = require('express').Router()
+const { request } = require('http')
 const Blog = require('../models/blog')
 const { userExtractor } = require('../utils/middleware')
 
@@ -71,6 +72,33 @@ blogsRouter.put('/:id', async (request, response, next) => {
     next(error)
   }
 });
+
+blogsRouter.post('/:id/comments', async (request, response, next) => {
+  try {
+    const { comment } = request.body
+
+    if (!comment) {
+      return response.status(400).json({ error: 'missing comment' })
+    }
+
+    const blog = await Blog.findById(request.params.id)
+    if (!blog) {
+      return response.status(404).end()
+    }
+
+    blog.comments.push(comment)
+
+    const savedBlog = await blog.save()
+
+    const populatedBlog = await Blog.findById(savedBlog._id)
+      .populate('user', { username: 1, name: 1 })
+
+    response.status(201).json(populatedBlog)
+  } catch (error) {
+    next(error)
+  }
+})
+
 
 
 module.exports = blogsRouter

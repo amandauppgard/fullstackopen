@@ -36,5 +36,10 @@ const handleDelete = async (id) => {
   return response.data
 }
 
+const addComment = async (id, comment) => {
+const response = await axios.post(`${baseUrl}/${id}/comments`, { comment })
+  return response.data
+}
 
-export default { getAll, setToken, create, update, handleDelete }
+
+export default { getAll, setToken, create, update, handleDelete, addComment }

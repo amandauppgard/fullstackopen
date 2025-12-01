@@ -4,7 +4,7 @@ import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
 import { useDispatch, useSelector } from 'react-redux';
 import { setNotification } from "./reducers/notificationReducer";
-import { appendBlogs, deleteBlog, initializeBlogs, likeBlog } from "./reducers/blogReducer";
+import { appendBlogs, initializeBlogs } from "./reducers/blogReducer";
 import { initializeUser, loginUser, logoutUser } from "./reducers/userReducers";
 import {
   BrowserRouter as Router,
@@ -21,6 +21,31 @@ const Notification = () => {
   if (!message) return null
   return <div className={`notification-${type}`}>{message}</div>;
 };
+
+const Menu = ({user}) => {
+  const dispatch = useDispatch()
+
+  const handleLogOut = async () => {
+    dispatch(logoutUser(user))
+  };
+
+  return (
+    <div>
+      <Link to='/'>blogs</Link>
+      <Link to='/users'>users</Link>
+      <div>
+        <p>{user.name} logged in</p>
+        <button
+          onClick={() => {
+            handleLogOut();
+          }}
+        >
+          logout
+        </button>
+      </div>
+    </div>
+  )
+}
 
 const Home = ({user, blogs }) => {
   if (!user) return null
@@ -48,7 +73,7 @@ const Home = ({user, blogs }) => {
       {[...blogs]
         .sort((a, b) => b.likes - a.likes)
         .map((blog) => (
-          <div style={blogStyle}>
+          <div style={blogStyle} key={blog.id} >
             <Link to={`/blogs/${blog.id}`}>{blog.title} {blog.author}</Link>
           </div>
         ))}
@@ -157,32 +182,17 @@ const App = () => {
     dispatch(initializeUsers())
   }, [dispatch]);
 
-  const handleLogOut = async () => {
-    dispatch(logoutUser(user))
-    useNavigate('/login')
-  };
+  if (!user) {
+    return <LoginForm />
+  }
 
   return (
     <Router>
       <h1>Blogs</h1>
-      { user ? (
-      <div>
-        <p>{user.name} logged in</p>
-        <button
-          onClick={() => {
-            handleLogOut();
-          }}
-        >
-          logout
-        </button>
-      </div>
-      ) : (
-        <></>
-      )}
+      <Menu user={user} />
       <Notification />
       <Routes>
         <Route path='/' element={<Home blogs={blogs} user={user} />} />
-        <Route path='/login' element={<LoginForm />} />
         <Route path='/users' element={<Users />} />
         <Route path='/users/:id' element={<User />} />
         <Route path='/blogs/:id' element={<Blog />} />

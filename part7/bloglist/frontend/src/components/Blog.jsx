@@ -1,12 +1,14 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
-import { deleteBlog, likeBlog } from '../reducers/blogReducer'
+import { deleteBlog, likeBlog, addComment } from '../reducers/blogReducer'
 import { setNotification } from '../reducers/notificationReducer'
+import { useState } from 'react'
 
 
 const Blog = () => {
   const blogs = useSelector(state => state.blogs)
   const user = useSelector(state => state.user)
+  const [comment, setComment] = useState('')
   const { id } = useParams()
   const blog = blogs.find(b => b.id === id)
   const dispatch = useDispatch()
@@ -21,9 +23,17 @@ const Blog = () => {
     if (blog && window.confirm(`Delete blog ${blog.title} by ${blog.author}`)) {
       dispatch(deleteBlog(blog.id))
       dispatch(setNotification(`Successfully deleted ${blog.title} by ${blog.author}`, 5, 'success'))
-
     }
   };
+
+  const handleNewComment = () => {
+    const blog = blogs.find((blog) => blog.id === id);
+    if (blog) {
+      dispatch(addComment(blog.id, comment))
+      setComment('')
+      dispatch(setNotification(`Successfully added comment`, 5, 'success'))
+    }
+  }
 
   if (!blog) return null
 
@@ -40,6 +50,18 @@ const Blog = () => {
       <div>
       {blog.user && (blog.user.username === user.username) ? (
         <button onClick={() => handleDelete(blog.id)}>delete</button>
+      ) : (
+        <></>
+      )}
+      <h3>comments</h3>
+      <input placeholder='Add comment' value={comment} onChange={(e) => setComment(e.target.value)}/>
+      <button onClick={() => handleNewComment()} >add comment</button>
+      {blog.comments ? (
+        <ul>
+          {blog.comments.map((comment, i) => (
+            <li key={i}>{comment}</li>
+          )) }
+        </ul>
       ) : (
         <></>
       )}
