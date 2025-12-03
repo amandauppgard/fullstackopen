@@ -14,6 +14,7 @@ import Notification from "./components/Notification";
 import Users from "./components/Users";
 import User from "./components/User";
 import Menu from "./components/Menu";
+import { Content, Header, Title } from "./styled";
 
 const App = () => {
   const dispatch = useDispatch()
@@ -32,15 +33,21 @@ const App = () => {
 
   return (
     <Router>
-      <h1>Blogs</h1>
-      <Menu user={user} />
+      <Header>
+        <Title>Blogs</Title>
+        <div>
+          <Menu user={user} />
+        </div>
+      </Header>
       <Notification />
-      <Routes>
-        <Route path='/' element={<Blogs blogs={blogs} user={user} />} />
-        <Route path='/users' element={<Users />} />
-        <Route path='/users/:id' element={<User />} />
-        <Route path='/blogs/:id' element={<Blog />} />
-      </Routes>
+      <Content>
+        <Routes>
+          <Route path='/' element={<Blogs blogs={blogs} user={user} />} />
+          <Route path='/users' element={<Users />} />
+          <Route path='/users/:id' element={<User />} />
+          <Route path='/blogs/:id' element={<Blog />} />
+        </Routes>
+      </Content>
     </Router>
   );
 };

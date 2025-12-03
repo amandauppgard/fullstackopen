@@ -1,6 +1,7 @@
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../reducers/userReducers";
 import { Link } from "react-router-dom";
+import { Button, NavBar } from "../styled";
 
 const Menu = ({user}) => {
   const dispatch = useDispatch()
@@ -10,20 +11,22 @@ const Menu = ({user}) => {
   };
 
   return (
-    <div>
-      <Link to='/'>blogs</Link>
-      <Link to='/users'>users</Link>
-      <div>
+    <NavBar>
+      <div style={{ display: 'flex', gap: '20px' }}>
+        <Link to='/'>blogs</Link>
+        <Link to='/users'>users</Link>
+      </div>
+      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
         <p>{user.name} logged in</p>
-        <button
+        <Button
           onClick={() => {
             handleLogOut();
           }}
         >
           logout
-        </button>
+        </Button>
       </div>
-    </div>
+    </NavBar>
   )
 }
 

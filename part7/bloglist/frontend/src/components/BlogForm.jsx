@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button, Input } from '../styled'
 
 const BlogForm = ({ createBlog }) => {
   const [newTitle, setNewTitle] = useState('')
@@ -15,31 +16,29 @@ const BlogForm = ({ createBlog }) => {
   }
 
   return (
-    <form onSubmit={addBlog}>
-      <div>
+    <form onSubmit={addBlog} style={{display: 'flex', gap: '5px', alignItems: 'center'}}>
         <label>
         title:
-          <input
+          <Input
             value={newTitle}
             onChange={({ target }) => setNewTitle(target.value)}
           />
         </label>
         <label>
         author:
-          <input
+          <Input
             value={newAuthor}
             onChange={({ target }) => setNewAuthor(target.value)}
           />
         </label>
         <label>
         url:
-          <input
+          <Input
             value={newUrl}
             onChange={({ target }) => setNewUrl(target.value)}
           />
         </label>
-      </div>
-      <button type="submit">submit</button>
+      <Button type="submit">submit</Button>
     </form>
   )
 }

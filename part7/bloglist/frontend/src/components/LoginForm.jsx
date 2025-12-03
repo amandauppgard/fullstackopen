@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../reducers/userReducers";
 import Notification from "./Notification";
+import { Button, Header, Input, LoginFormStyle, Title } from "../styled";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
@@ -17,28 +18,31 @@ const LoginForm = () => {
 
   return (
     <>
-      <h1>log in to application</h1>
-      <Notification />
+    <Header>
+      <Title>Log in to application</Title>
+    </Header>
+    <Notification />
       <form onSubmit={handleLogIn}>
-        <div>
-          <label>
-            username
-            <input
-              type="text"
-              value={username}
-              onChange={({ target }) => setUsername(target.value)}
-            />
-          </label>
-          <label>
-            password
-            <input
-              type="password"
-              value={password}
-              onChange={({ target }) => setPassword(target.value)}
-            />
-          </label>
-        </div>
-        <button type="submit">login</button>
+        <LoginFormStyle>
+        <label>
+          username:
+          <Input
+            type="text"
+            value={username}
+            onChange={({ target }) => setUsername(target.value)}
+          />
+        </label>
+        <label>
+          password:
+          <Input
+            type="password"
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </label>
+        <Button type="submit">login</Button>
+            </LoginFormStyle>
+
       </form>
     </>
   )

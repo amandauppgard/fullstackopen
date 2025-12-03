@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { deleteBlog, likeBlog, addComment } from '../reducers/blogReducer'
 import { setNotification } from '../reducers/notificationReducer'
 import { useState } from 'react'
+import { Button, Input } from '../styled'
 
 
 const Blog = () => {
@@ -44,18 +45,18 @@ const Blog = () => {
       <a href={blog.url} >{blog.url}</a>
       <div>
         {blog.likes} likes
-        <button onClick={() => handleLike(blog)}>like</button>
+        <Button onClick={() => handleLike(blog)}>like</Button>
       </div>
       added by {blog.author}
       <div>
       {blog.user && (blog.user.username === user.username) ? (
-        <button onClick={() => handleDelete(blog.id)}>delete</button>
+        <Button onClick={() => handleDelete(blog.id)}>delete</Button>
       ) : (
         <></>
       )}
       <h3>comments</h3>
-      <input placeholder='Add comment' value={comment} onChange={(e) => setComment(e.target.value)}/>
-      <button onClick={() => handleNewComment()} >add comment</button>
+      <Input placeholder='Add comment' value={comment} onChange={(e) => setComment(e.target.value)}/>
+      <Button onClick={() => handleNewComment()} >add comment</Button>
       {blog.comments ? (
         <ul>
           {blog.comments.map((comment, i) => (
