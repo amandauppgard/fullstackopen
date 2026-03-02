@@ -30,8 +30,8 @@ const resolvers = {
     }
   },
   Author: {
-    bookCount: (root) => {
-        return Book.countDocuments({ author: root._id })
+    bookCount: async (root) => {
+        return await Book.countDocuments({ author: root._id })
     }
   },
   Mutation: {
