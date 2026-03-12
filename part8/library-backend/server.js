@@ -18,15 +18,15 @@ const getUserFromAuthHeader = async (auth) => {
 const startServer = (port) => {
   const server = new ApolloServer({
     typeDefs,
-    resolvers,
+    resolvers
+  })
+  startStandaloneServer(server, {
+    listen: { port },
     context: async ({ req }) => {
       const auth = req.headers.authorization
       const currentUser = await getUserFromAuthHeader(auth)
       return { currentUser }
     }
-  })
-  startStandaloneServer(server, {
-    listen: { port },
   }).then(({ url }) => {
     console.log(`Server ready at ${url}`)
   })
