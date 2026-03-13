@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { useMutation } from '@apollo/client/react'
-
+import { ALL_AUTHORS, EDIT_BIRTHYEAR } from '../queries'
 
 const Authors = (props) => {
   const [year, setYear] = useState('')
   const [author, setAuthor] = useState('')
-  const [updateYear] = useMutation(props.EDIT_BIRTHYEAR, {refetchQueries: [{query: props.ALL_AUTHORS}]})
+  const [updateYear] = useMutation(EDIT_BIRTHYEAR, {refetchQueries: [{query: ALL_AUTHORS}]})
 
   if (!props.show) {
     return null
