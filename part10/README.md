@@ -5,8 +5,9 @@ A mobile application for rating GitHub repositories. Users can browse GitHub-sty
 ## Try the app on your phone
 
 You can try the app on your phone by scanning the following QR code with Expo Go:
+
+<br/>
+
 ![QR code to try the app in expo go](image.png)
-
-
 
 Orginally worked on at https://github.com/amandauppgard/rate-repository-app
